@@ -1,3 +1,5 @@
+using Bookline.Api.Data;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 const string SpaCorsPolicy = "spa";
 builder.Services.AddCors(options => options.AddPolicy(SpaCorsPolicy, policy => policy
@@ -16,6 +21,15 @@ builder.Services.AddCors(options => options.AddPolicy(SpaCorsPolicy, policy => p
 
 
 var app = builder.Build();
+
+// Development only: bring the database up to date and populate demo data.
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+    await DbSeeder.SeedAsync(db);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
