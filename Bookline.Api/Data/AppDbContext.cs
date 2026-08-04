@@ -1,9 +1,11 @@
 using Bookline.Api.Domain;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bookline.Api.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options)
+    : IdentityDbContext<AppUser>(options)
 {
     public DbSet<Business> Businesses => Set<Business>();
     public DbSet<Staff> Staff => Set<Staff>();
@@ -22,6 +24,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        // Identity's own tables (AspNetUsers, AspNetRoles, ...) are configured here.
+        base.OnModelCreating(builder);
+
         builder.Entity<Business>()
             .HasIndex(b => b.Slug)
             .IsUnique();
