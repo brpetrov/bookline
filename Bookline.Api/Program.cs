@@ -1,6 +1,7 @@
 using Bookline.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Bookline.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
+builder.Services.AddScoped<AvailabilityService>();
 
 const string SpaCorsPolicy = "spa";
 builder.Services.AddCors(options => options.AddPolicy(SpaCorsPolicy, policy => policy
