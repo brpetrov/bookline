@@ -2,6 +2,9 @@ using Bookline.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Bookline.Api.Services;
+using FluentValidation;
+using Bookline.Api.Validation;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddScoped<AvailabilityService>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateBookingRequestValidator>();
+
 
 const string SpaCorsPolicy = "spa";
 builder.Services.AddCors(options => options.AddPolicy(SpaCorsPolicy, policy => policy
