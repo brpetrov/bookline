@@ -1,6 +1,7 @@
 import { NavLink, Navigate, Outlet, useLocation } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
 import { initials } from '../lib/format'
+import { useScheduleHub } from './useScheduleHub'
 
 const NAV = [
   { to: '/admin/calendar', label: 'Calendar', icon: '▦' },
@@ -23,6 +24,7 @@ export function RequireAuth() {
 
 export function AdminLayout() {
   const { session, signOut } = useAuth()
+  const live = useScheduleHub()
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -32,6 +34,12 @@ export function AdminLayout() {
             B
           </span>
           <span className="font-semibold tracking-tight text-slate-900">Bookline</span>
+          <span
+            title={live ? 'Live updates connected' : 'Live updates offline'}
+            className={
+              'ml-auto h-2 w-2 rounded-full ' + (live ? 'bg-emerald-500' : 'bg-slate-300')
+            }
+          />
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-2">

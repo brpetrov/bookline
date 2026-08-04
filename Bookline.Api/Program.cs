@@ -2,6 +2,7 @@ using System.Text;
 using Bookline.Api.Auth;
 using Bookline.Api.Data;
 using Bookline.Api.Domain;
+using Bookline.Api.Hubs;
 using Bookline.Api.Services;
 using Bookline.Api.Validation;
 using FluentValidation;
@@ -20,6 +21,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddScoped<AvailabilityService>();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<ScheduleNotifier>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateBookingRequestValidator>();
 
 // ── Identity ────────────────────────────────────────────────────────────────
@@ -70,6 +73,23 @@ builder.Services
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromSeconds(30),
         };
+
+        // A WebSocket handshake cannot carry an Authorization header, so SignalR
+        // passes the token as ?access_token=. Accept it for hub paths only.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(token) &&
+                    context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = token;
+                }
+
+                return Task.CompletedTask;
+            },
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -111,5 +131,6 @@ app.UseAuthorization();
 
 app.MapGet("/api/health", () => new { status = "ok" });
 app.MapControllers();
+app.MapHub<ScheduleHub>("/hubs/schedule");
 
 app.Run();

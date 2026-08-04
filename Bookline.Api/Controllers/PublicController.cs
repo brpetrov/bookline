@@ -1,6 +1,7 @@
 using Bookline.Api.Data;
 using Bookline.Api.Domain;
 using Bookline.Api.Dtos;
+using Bookline.Api.Hubs;
 using Bookline.Api.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +11,11 @@ namespace Bookline.Api.Controllers;
 
 [ApiController]
 [Route("api/public/{slug}")]
-public class PublicController(AvailabilityService availability, AppDbContext db,
- IValidator<CreateBookingRequest> bookingValidator) : ControllerBase
+public class PublicController(
+    AvailabilityService availability,
+    AppDbContext db,
+    IValidator<CreateBookingRequest> bookingValidator,
+    ScheduleNotifier notifier) : ControllerBase
 {    
     [HttpGet("services")]
     public async Task<ActionResult<List<ServiceDto>>> GetServices(string slug, CancellationToken ct)
@@ -164,6 +168,8 @@ public class PublicController(AvailabilityService availability, AppDbContext db,
 
         db.Appointments.Add(appointment);
         await db.SaveChangesAsync(ct);
+
+        await notifier.AppointmentCreated(business.Id, appointment.Id);
 
         return Ok(new BookingConfirmationDto(
             appointment.Id,

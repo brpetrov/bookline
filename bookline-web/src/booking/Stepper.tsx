@@ -20,10 +20,17 @@ export function Stepper({ current }: { current: number }) {
             >
               {state === 'done' ? '✓' : index + 1}
             </span>
-            <span className={state === 'todo' ? 'text-slate-400' : 'text-slate-700'}>
+            {/* On narrow screens only the current step keeps its label, so the
+                row never overflows. */}
+            <span
+              className={
+                (state === 'current' ? 'inline' : 'hidden sm:inline') +
+                (state === 'todo' ? ' text-slate-400' : ' text-slate-700')
+              }
+            >
               {label}
             </span>
-            {index < STEPS.length - 1 && <span className="h-px w-4 bg-slate-200" />}
+            {index < STEPS.length - 1 && <span className="h-px w-3 bg-slate-200 sm:w-4" />}
           </li>
         )
       })}

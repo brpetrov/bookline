@@ -3,6 +3,7 @@ using Bookline.Api.Auth;
 using Bookline.Api.Data;
 using Bookline.Api.Domain;
 using Bookline.Api.Dtos;
+using Bookline.Api.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ namespace Bookline.Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/appointments")]
-public class AppointmentsController(AppDbContext db) : ControllerBase
+public class AppointmentsController(AppDbContext db, ScheduleNotifier notifier) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<List<AppointmentDto>>> GetRange(
@@ -123,6 +124,8 @@ public class AppointmentsController(AppDbContext db) : ControllerBase
         db.Appointments.Add(appointment);
         await db.SaveChangesAsync(ct);
 
+        await notifier.AppointmentCreated(businessId, appointment.Id);
+
         return await GetOne(appointment.Id, ct);
     }
 
@@ -200,6 +203,8 @@ public class AppointmentsController(AppDbContext db) : ControllerBase
 
         await db.SaveChangesAsync(ct);
 
+        await notifier.AppointmentUpdated(businessId, appointment.Id);
+
         return await GetOne(appointment.Id, ct);
     }
 
@@ -222,6 +227,8 @@ public class AppointmentsController(AppDbContext db) : ControllerBase
 
         appointment.Status = AppointmentStatus.Cancelled;
         await db.SaveChangesAsync(ct);
+
+        await notifier.AppointmentCancelled(businessId, appointment.Id);
 
         return NoContent();
     }
