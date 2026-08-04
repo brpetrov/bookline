@@ -9,6 +9,28 @@ SignalR · EF Core + SQL Server · ASP.NET Core Identity + JWT
 
 ---
 
+![Week calendar](docs/screenshots/01-week-calendar.png)
+
+<p align="center">
+  <img src="docs/screenshots/03-dashboard.png" width="49%" alt="Dashboard" />
+  <img src="docs/screenshots/04-appointment-drawer.png" width="49%" alt="Appointment drawer" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/02-public-availability.png" width="49%" alt="Public booking availability" />
+  <img src="docs/screenshots/07-staff.png" width="49%" alt="Staff management" />
+</p>
+
+More in [`docs/screenshots`](docs/screenshots). To regenerate them with both servers
+running:
+
+```bash
+cd bookline-web
+npm install --no-save playwright
+node scripts/screenshots.mjs
+```
+
+---
+
 ## What it does
 
 **Public booking page** — pick a service, pick a stylist (or "anyone"), see real
