@@ -1,5 +1,6 @@
 import type {
   BookingConfirmation,
+  BusinessProfile,
   CreateBookingRequest,
   DayAvailability,
   ProblemDetails,
@@ -43,6 +44,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  business: () => request<BusinessProfile>(''),
+
   services: () => request<Service[]>('/services'),
 
   staff: (serviceId?: number) =>

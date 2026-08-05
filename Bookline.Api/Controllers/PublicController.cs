@@ -16,7 +16,32 @@ public class PublicController(
     AppDbContext db,
     IValidator<CreateBookingRequest> bookingValidator,
     ScheduleNotifier notifier) : ControllerBase
-{    
+{
+    [HttpGet]
+    public async Task<ActionResult<BusinessProfileDto>> GetBusiness(string slug, CancellationToken ct)
+    {
+        var business = await db.Businesses
+            .Where(b => b.Slug == slug)
+            .Select(b => new { b.Id, b.Name, b.Timezone })
+            .FirstOrDefaultAsync(ct);
+
+        if (business is null)
+        {
+            return BusinessNotFound(slug);
+        }
+
+        var hours = await db.OpeningHours
+            .Where(o => o.BusinessId == business.Id)
+            .OrderBy(o => o.DayOfWeek)
+            .Select(o => new OpeningHourSummaryDto(
+                (int)o.DayOfWeek,
+                o.OpenTime.ToString("HH:mm"),
+                o.CloseTime.ToString("HH:mm")))
+            .ToListAsync(ct);
+
+        return Ok(new BusinessProfileDto(business.Name, business.Timezone, hours));
+    }
+
     [HttpGet("services")]
     public async Task<ActionResult<List<ServiceDto>>> GetServices(string slug, CancellationToken ct)
     {

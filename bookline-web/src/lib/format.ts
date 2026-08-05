@@ -39,6 +39,19 @@ export const dayNumber = (date: string) => plainDate(date, { day: 'numeric' })
 
 export const monthName = (date: string) => plainDate(date, { month: 'short' })
 
+/** Hour 0-23 of an instant in salon time, for grouping slots into morning/afternoon. */
+export const salonHour = (isoUtc: string) =>
+  Number(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: SALON_TZ,
+      hour: '2-digit',
+      hourCycle: 'h23',
+    }).format(new Date(isoUtc)),
+  )
+
+/** 0 (Sunday) to 6 (Saturday) for a plain "2026-08-06" calendar date. */
+export const dayOfWeek = (date: string) => new Date(`${date}T12:00:00Z`).getUTCDay()
+
 export const initials = (name: string) =>
   name
     .split(' ')

@@ -2,7 +2,23 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api/client'
 import type { AvailableSlot, Service } from '../api/types'
-import { addDaysIso, dayName, dayNumber, monthName, salonTime, todayIso } from '../lib/format'
+import {
+  addDaysIso,
+  dayName,
+  dayNumber,
+  monthName,
+  plainDate,
+  salonHour,
+  salonTime,
+  todayIso,
+} from '../lib/format'
+
+/** Slots read as a list of times; splitting them by part of day makes them scannable. */
+const PARTS = [
+  { label: 'Morning', before: 12 },
+  { label: 'Afternoon', before: 17 },
+  { label: 'Evening', before: 24 },
+]
 
 export function TimeStep({
   service,
@@ -103,23 +119,53 @@ export function TimeStep({
         })}
       </div>
 
-      <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-          {slots.map((slot) => (
-            <button
-              key={slot.startsAtUtc}
-              type="button"
-              onClick={() => onPick(slot)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:bg-indigo-50 hover:text-indigo-700 hover:ring-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              <span className="block tabular-nums">{salonTime(slot.startsAtUtc)}</span>
-              {staffId === null && (
-                <span className="block text-xs font-normal text-slate-400">
-                  {staffName(slot.staffId)?.split(' ')[0]}
-                </span>
-              )}
-            </button>
-          ))}
+      <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+        <div className="flex items-baseline justify-between gap-4 border-b border-slate-100 px-5 py-4">
+          <h2 className="font-medium text-slate-900">
+            {plainDate(activeDate, { weekday: 'long', day: 'numeric', month: 'long' })}
+          </h2>
+          <p className="text-sm text-slate-500">
+            {slots.length} {slots.length === 1 ? 'time' : 'times'} available
+          </p>
+        </div>
+
+        <div className="space-y-5 px-5 py-5">
+          {PARTS.map((part, index) => {
+            const after = index === 0 ? 0 : PARTS[index - 1]!.before
+            const inPart = slots.filter((slot) => {
+              const hour = salonHour(slot.startsAtUtc)
+              return hour >= after && hour < part.before
+            })
+
+            if (inPart.length === 0) {
+              return null
+            }
+
+            return (
+              <div key={part.label}>
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  {part.label}
+                </h3>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                  {inPart.map((slot) => (
+                    <button
+                      key={slot.startsAtUtc}
+                      type="button"
+                      onClick={() => onPick(slot)}
+                      className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition hover:bg-indigo-50 hover:text-indigo-700 hover:ring-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    >
+                      <span className="block tabular-nums">{salonTime(slot.startsAtUtc)}</span>
+                      {staffId === null && (
+                        <span className="block text-xs font-normal text-slate-400">
+                          {staffName(slot.staffId)?.split(' ')[0]}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>

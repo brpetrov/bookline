@@ -146,6 +146,7 @@ bookline-web/
 ## API
 
 ```
+GET    /api/public/{slug}                    name, timezone, opening hours
 GET    /api/public/{slug}/services
 GET    /api/public/{slug}/staff?serviceId=
 GET    /api/public/{slug}/availability?serviceId=&staffId=&from=&to=

@@ -1,3 +1,15 @@
+export type OpeningHourSummary = {
+  dayOfWeek: number
+  openTime: string
+  closeTime: string
+}
+
+export type BusinessProfile = {
+  name: string
+  timezone: string
+  openingHours: OpeningHourSummary[]
+}
+
 export type Service = {
   id: number
   name: string

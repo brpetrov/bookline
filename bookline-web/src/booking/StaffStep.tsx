@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api/client'
-import type { Service } from '../api/types'
+import type { Service, Staff } from '../api/types'
 import { Avatar } from '../components/Avatar'
 
 export function StaffStep({
@@ -8,7 +8,7 @@ export function StaffStep({
   onPick,
 }: {
   service: Service
-  onPick: (staffId: number | null) => void
+  onPick: (staff: Staff | null) => void
 }) {
   const { data: staff, isPending, error } = useQuery({
     queryKey: ['staff', service.id],
@@ -56,7 +56,7 @@ export function StaffStep({
         <button
           key={member.id}
           type="button"
-          onClick={() => onPick(member.id)}
+          onClick={() => onPick(member)}
           className="flex w-full items-center gap-4 rounded-xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 transition hover:ring-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <Avatar name={member.name} colour={member.colour} avatarUrl={member.avatarUrl} />

@@ -96,6 +96,9 @@ async function main() {
   const services = await authed.newPage()
   await services.goto(`${WEB}/admin/services`)
   await services.waitForSelector('table', { timeout: 15000 })
+  // The team chips and this-week columns need the staff and dashboard queries too.
+  await services.waitForSelector('text=stylists', { timeout: 15000 })
+  await services.waitForTimeout(600)
   await shot(services, '06-services.png')
 
   const staff = await authed.newPage()
@@ -118,12 +121,17 @@ async function main() {
   await booking.waitForTimeout(1000)
   await shot(booking, '02-public-availability.png')
 
-  // ── 9. Booking details form ─────────────────────────────────────────────
-  const slots = booking.locator('.grid button')
+  // ── 9. Booking details form, filled in — an empty form photographs badly ─
+  // Slot buttons start with a time; the day strip above reads "Wed 5 Aug".
+  const slots = booking.getByRole('button', { name: /^\d\d:\d\d/ })
   if ((await slots.count()) > 0) {
     await slots.first().click()
     await booking.waitForSelector('text=Your name', { timeout: 10000 })
-    await booking.waitForTimeout(700)
+    await booking.locator('input[type="text"]').first().fill('Jamie Fletcher')
+    await booking.locator('input[type="email"]').fill('jamie.fletcher@gmail.con')
+    await booking.locator('input[type="tel"]').fill('07700 900142')
+    await booking.locator('textarea').fill('Running from the station, might be two minutes late.')
+    await booking.waitForTimeout(400)
     await shot(booking, '09-booking-details.png')
   }
 
